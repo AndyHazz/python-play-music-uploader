@@ -18,11 +18,11 @@ from os import walk
 
 import glob
 
-#CHANGE THESE
+#CHANGE THESE (no trailing slash on dirs)
 ######################################
 oauthFile = "/owner/.oauthfile"
 uploadDir = "/mnt/hd0/Music/uploads/"
-storageDir = "/mnt/hd0/Music/"
+rootStorageDir = "/mnt/hd0/Music/"
 #####################################
 #ADD THESE
 ####################################
@@ -56,6 +56,9 @@ def upload(api, uploader):
                         	mp3file = os.path.join(root,file)
                                 break
         print mp3file
+        
+        retainedFolders = root.replace(uploadDir, '')
+        storageDir = rootStorageDir + retainedFolders
 
 	#Returns the result of the upload in a tuple
 	uploadDict = api.upload(mp3file, 1, True)
@@ -79,16 +82,22 @@ def upload(api, uploader):
 			uploader.upload_album_art(songid,"/tmp/cover/img.jpg")
 			#call(["rm","/tmp/cover/*"])
 		#Move uploaded file to the storage directory
+		if not os.path.exists(storageDir):
+                        os.makedirs(storageDir)
 		call(["mv",mp3file,storageDir])
 		#Clean up tmp folder and files
 		call(["rm","-R","/tmp/cover"])
 		print "Uploaded"
 	#Move uploaded file to the storage directory if it was matched to a song on the google servers
 	elif uploadDict[1]:
+		if not os.path.exists(storageDir):
+                        os.makedirs(storageDir)
 		call(["mv",mp3file,storageDir])
 		print "Matched song on Google servers"
 	#Move uploaded file to the storage directory if it was already uploaded to the account
 	elif uploadDict[2]:
+		if not os.path.exists(storageDir):
+                        os.makedirs(storageDir)
 		call(["mv",mp3file,storageDir])
 		print "Already uploaded"
 
